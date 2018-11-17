@@ -18,15 +18,42 @@ def load_data():
 
 
 def search(mapping, term):
+    term = term.lower()
     results = []
-    for index, synset in enumerate(mapping):
-        if term in synset.words:
+    search_query = term.split()
+    for index, entry in enumerate(mapping):
+        words = entry.words.lower()
+        if all(query in words for query in search_query):
             results.append(mapping[index])
     return results
 
 if __name__ == "__main__":
-    search_term = "Japanese oak"
+    trees = ["tilia x europaea", 
+            "ulmus minor var. vulgaris", 
+            "aesculus hippocastanum", 
+            "alnus glutinosa", 
+            "fraxinus excelsior", 
+            "populus tremula", 
+            "sorbus aucuparia", 
+            "quercus robur", 
+            "platanus x hispanica", 
+            "common fagus sylvatica", 
+            "pinus sylvestris", 
+            "salix fragilis", 
+            "acer campestre", 
+            "corylus avellana", 
+            "ilex aquifolium", 
+            "carpinus betulus", 
+            "quercus petraea", 
+            "betula pendula", 
+            "castanea sativa", 
+            "acer pseudoplatanus", 
+            "taxus baccata", 
+            ]
+
     words = load_data()
-    result = search(words, search_term)
-    for r in result:
-        print(r)
+    for search_term in trees:
+        print(search_term)
+        result = search(words, search_term)
+        for r in result:
+            print(f"\t{r.wnid}\t{r.words}")
