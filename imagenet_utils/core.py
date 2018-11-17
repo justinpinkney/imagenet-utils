@@ -1,5 +1,6 @@
 import os
 from collections import namedtuple
+import requests
 
 Synset = namedtuple('Synset', ['wnid', 'words'])
 
@@ -57,3 +58,8 @@ if __name__ == "__main__":
         result = search(words, search_term)
         for r in result:
             print(f"\t{r.wnid}\t{r.words}")
+
+    url = "http://www.image-net.org/api/text/imagenet.synset.geturls"
+    payload = {"wnid": result[0].wnid}
+    r = requests.get(url, params=payload)
+    print(len(r.text.splitlines()))
