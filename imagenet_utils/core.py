@@ -20,6 +20,19 @@ def load_data():
 
     return mapping
 
+def urls(wnid):
+    """Return the list of urls for a given wnid."""
+
+    url = "http://www.image-net.org/api/text/imagenet.synset.geturls"
+    payload = {"wnid": wnid}
+    response = requests.get(url, params=payload)
+    response.raise_for_status()
+    result = response.text
+
+    if result.strip() == "Invalid url!":
+        raise ValueError(f"Unknown wnid '{wnid}'")
+    else:
+        return result.split()
 
 def search(term):
     """Search for a term in the set of synset descriptions."""
@@ -66,7 +79,3 @@ if __name__ == "__main__":
         for r in result:
             print(f"\t{r.wnid}\t{r.words}")
 
-    url = "http://www.image-net.org/api/text/imagenet.synset.geturls"
-    payload = {"wnid": result[0].wnid}
-    r = requests.get(url, params=payload)
-    print(len(r.text.splitlines()))

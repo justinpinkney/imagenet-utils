@@ -1,2 +1,2 @@
 from .core import search
-from .core import load_data
+from .core import urls
