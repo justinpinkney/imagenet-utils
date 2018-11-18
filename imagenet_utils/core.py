@@ -1,10 +1,13 @@
 import os
 from collections import namedtuple
 import requests
+from functools import lru_cache
 
 Synset = namedtuple('Synset', ['wnid', 'words'])
 
+@lru_cache()
 def load_data():
+    """Retrieve the wnid to words mapping."""
     words_file = os.path.join(os.path.dirname(__file__), "words.txt")
 
     with open(words_file) as f:
@@ -18,14 +21,19 @@ def load_data():
     return mapping
 
 
-def search(mapping, term):
+def search(term):
+    """Search for a term in the set of synset descriptions."""
+
+    mapping = load_data()
     term = term.lower()
-    results = []
     search_query = term.split()
+
+    results = []
     for index, entry in enumerate(mapping):
         words = entry.words.lower()
         if all(query in words for query in search_query):
             results.append(mapping[index])
+
     return results
 
 if __name__ == "__main__":
@@ -52,10 +60,9 @@ if __name__ == "__main__":
             "taxus baccata", 
             ]
 
-    words = load_data()
     for search_term in trees:
         print(search_term)
-        result = search(words, search_term)
+        result = search(search_term)
         for r in result:
             print(f"\t{r.wnid}\t{r.words}")
 
