@@ -1,5 +1,6 @@
 from .context import imagenet_utils as imnet
 import pytest
+import pathlib
 
 def test_search():
     result = imnet.search("taxus baccata")
@@ -18,3 +19,14 @@ def test_bad_urls():
      
     with pytest.raises(ValueError):
         urls = imnet.urls(not_wnid)
+
+def test_save_image(tmpdir):
+    filename = "test"
+    url = "http://image-net.org/nodes/11/07851298/ae/aec22f13c9abb26dc0b378e0f5f9d4fc5769e0ce.thumb"
+    image = imnet.Image(filename, url)
+    expected_path = pathlib.Path(tmpdir, filename + ".jpg")
+
+    imnet.save_image(image, tmpdir)
+
+    assert expected_path.is_file()
+

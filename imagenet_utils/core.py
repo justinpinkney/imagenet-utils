@@ -4,6 +4,7 @@ import requests
 from functools import lru_cache
 
 Synset = namedtuple('Synset', ['wnid', 'words'])
+Image = namedtuple('Image', ['filename', 'url'])
 
 @lru_cache()
 def load_data():
@@ -21,9 +22,9 @@ def load_data():
     return mapping
 
 def urls(wnid):
-    """Return the list of urls for a given wnid."""
+    """Return the list of Images for a given wnid."""
 
-    url = "http://www.image-net.org/api/text/imagenet.synset.geturls"
+    url = "http://www.image-net.org/api/text/imagenet.synset.geturls.getmapping"
     payload = {"wnid": wnid}
     response = requests.get(url, params=payload)
     response.raise_for_status()
@@ -32,7 +33,29 @@ def urls(wnid):
     if result.strip() == "Invalid url!":
         raise ValueError(f"Unknown wnid '{wnid}'")
     else:
-        return result.split()
+        images = []
+        for line in result.strip().splitlines():
+            x = line.split()
+            images.append(Image(filename=x[0], url=x[1]))
+        return images
+
+
+def save_image(image, destination):
+    """Save the Image to a destination folder."""
+    response = requests.get(image.url)
+    response.raise_for_status()
+    content = response.content
+    filepath = os.path.join(destination, image.filename + ".jpg")
+    with open(filepath, "wb") as out_file:
+        out_file.write(content)
+
+
+def download(wnid, destination):
+    """Download images associated with a wnid."""
+    image_urls = urls(wnid)
+    for url in image_urls:
+        save_image(url, destination)
+
 
 def search(term):
     """Search for a term in the set of synset descriptions."""
