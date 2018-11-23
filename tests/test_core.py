@@ -22,11 +22,21 @@ def test_bad_urls():
 
 def test_save_image(tmpdir):
     filename = "test"
+    subdir = "folder"
     url = "http://image-net.org/nodes/11/07851298/ae/aec22f13c9abb26dc0b378e0f5f9d4fc5769e0ce.thumb"
     image = imnet.Image(filename, url)
-    expected_path = pathlib.Path(tmpdir, filename + ".jpg")
+    expected_path = pathlib.Path(tmpdir, subdir, filename + ".jpg")
 
-    imnet.save_image(image, tmpdir)
+    imnet.save_image(image, pathlib.Path(tmpdir, subdir))
 
     assert expected_path.is_file()
+
+def test_save_not_image(tmpdir):
+    filename = "test"
+    subdir = "folder"
+    url = "http://www.google.com"
+    image = imnet.Image(filename, url)
+
+    with pytest.raises(ValueError):
+        imnet.save_image(image, pathlib.Path(tmpdir, subdir))
 

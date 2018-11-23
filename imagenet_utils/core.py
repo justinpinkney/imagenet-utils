@@ -42,19 +42,34 @@ def urls(wnid):
 
 def save_image(image, destination):
     """Save the Image to a destination folder."""
-    response = requests.get(image.url)
+    max_time = 5
+    # check it is an image
+    image_check = requests.head(image.url, allow_redirects=False, timeout=max_time)
+    content_type = image_check.headers.get("Content-Type")
+
+    if not content_type == "image/jpeg":
+        raise ValueError(f"url not an image, instead type was {content_type}")
+
+    response = requests.get(image.url, allow_redirects=False, timeout=max_time)
     response.raise_for_status()
     content = response.content
+
+    if not os.path.isdir(destination):
+        os.mkdir(destination)
+
     filepath = os.path.join(destination, image.filename + ".jpg")
     with open(filepath, "wb") as out_file:
         out_file.write(content)
 
-
 def download(wnid, destination):
     """Download images associated with a wnid."""
     image_urls = urls(wnid)
-    for url in image_urls:
-        save_image(url, destination)
+    for image in image_urls:
+        try:
+            print(f"Downloading {image.filename}")
+            save_image(image, destination)
+        except requests.exceptions.RequestException:
+            print(f"Could not retrieve image {image.filename}")
 
 
 def search(term):
@@ -102,3 +117,5 @@ if __name__ == "__main__":
         for r in result:
             print(f"\t{r.wnid}\t{r.words}")
 
+    output = "test"
+    download("n11661909", output)
