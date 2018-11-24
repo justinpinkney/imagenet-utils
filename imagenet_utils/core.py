@@ -1,7 +1,9 @@
+"""Core functions for donwloadingin imagenet urls"""
 import os
 from collections import namedtuple
-import requests
 from functools import lru_cache
+
+import requests
 
 Synset = namedtuple('Synset', ['wnid', 'words'])
 Image = namedtuple('Image', ['filename', 'url'])
@@ -11,8 +13,8 @@ def load_data():
     """Retrieve the wnid to words mapping."""
     words_file = os.path.join(os.path.dirname(__file__), "words.txt")
 
-    with open(words_file) as f:
-        lines = f.readlines()
+    with open(words_file) as out_file:
+        lines = out_file.readlines()
 
     mapping = []
     for line in lines:
@@ -35,8 +37,8 @@ def urls(wnid):
     else:
         images = []
         for line in result.strip().splitlines():
-            x = line.split()
-            images.append(Image(filename=x[0], url=x[1]))
+            elements = line.split()
+            images.append(Image(filename=elements[0], url=elements[1]))
         return images
 
 
@@ -91,34 +93,33 @@ def search(term):
     return results
 
 if __name__ == "__main__":
-    trees = ["tilia x europaea", 
-            "ulmus minor var. vulgaris", 
-            "aesculus hippocastanum", 
-            "alnus glutinosa", 
-            "fraxinus excelsior", 
-            "populus tremula", 
-            "sorbus aucuparia", 
-            "quercus robur", 
-            "platanus x hispanica", 
-            "common fagus sylvatica", 
-            "pinus sylvestris", 
-            "salix fragilis", 
-            "acer campestre", 
-            "corylus avellana", 
-            "ilex aquifolium", 
-            "carpinus betulus", 
-            "quercus petraea", 
-            "betula pendula", 
-            "castanea sativa", 
-            "acer pseudoplatanus", 
-            "taxus baccata", 
-            ]
+    trees = ["tilia x europaea",
+             "ulmus minor var. vulgaris",
+             "aesculus hippocastanum",
+             "alnus glutinosa",
+             "fraxinus excelsior",
+             "populus tremula",
+             "sorbus aucuparia",
+             "quercus robur",
+             "platanus x hispanica",
+             "common fagus sylvatica",
+             "pinus sylvestris",
+             "salix fragilis",
+             "acer campestre",
+             "corylus avellana",
+             "ilex aquifolium",
+             "carpinus betulus",
+             "quercus petraea",
+             "betula pendula",
+             "castanea sativa",
+             "acer pseudoplatanus",
+             "taxus baccata",
+             ]
 
     for search_term in trees:
         print(search_term)
-        result = search(search_term)
-        for r in result:
+        tree_result = search(search_term)
+        for r in tree_result:
             print(f"\t{r.wnid}\t{r.words}")
 
-    output = "test"
-    download("n11661909", output)
+    download("n11661909", "test")
