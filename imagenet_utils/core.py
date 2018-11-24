@@ -42,15 +42,17 @@ def urls(wnid):
 
 def save_image(image, destination):
     """Save the Image to a destination folder."""
-    max_time = 5
+    request_opts = {"timeout": 5,
+                    "allow_redirects": False,
+                    }
     # check it is an image
-    image_check = requests.head(image.url, allow_redirects=False, timeout=max_time)
+    image_check = requests.head(image.url, **request_opts)
     content_type = image_check.headers.get("Content-Type")
 
     if not content_type == "image/jpeg":
         raise ValueError(f"url not an image, instead type was {content_type}")
 
-    response = requests.get(image.url, allow_redirects=False, timeout=max_time)
+    response = requests.get(image.url, **request_opts)
     response.raise_for_status()
     content = response.content
 
@@ -61,6 +63,7 @@ def save_image(image, destination):
     with open(filepath, "wb") as out_file:
         out_file.write(content)
 
+
 def download(wnid, destination):
     """Download images associated with a wnid."""
     image_urls = urls(wnid)
@@ -68,7 +71,7 @@ def download(wnid, destination):
         try:
             print(f"Downloading {image.filename}")
             save_image(image, destination)
-        except requests.exceptions.RequestException:
+        except (requests.exceptions.RequestException, ValueError):
             print(f"Could not retrieve image {image.filename}")
 
 
