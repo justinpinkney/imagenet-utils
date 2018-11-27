@@ -1,11 +1,27 @@
 import click
+import imagenet_utils as imnet
 
 @click.group()
 def cli():
     pass
 
 @click.command()
-def search():
-    click.echo("Searched")
+@click.argument('term')
+@click.option('-n', '--number', type=int)
+def search(term, number):
+    results = imnet.search(term)
+    if number and len(results) > number:
+        results = results[:number]
+    for result in results:
+        click.echo(f"{result.wnid}: {result.words}")
+
+@click.command()
+@click.argument('wnid')
+@click.option('-o', '--output-folder')
+def download(wnid, output_folder=None):
+    if not output_folder:
+        destination = wnid
+    imnet.download(wnid, destination)
 
 cli.add_command(search)
+cli.add_command(download)

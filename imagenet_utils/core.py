@@ -2,6 +2,7 @@
 import os
 from collections import namedtuple
 from functools import lru_cache
+import re
 
 import requests
 
@@ -77,17 +78,24 @@ def download(wnid, destination):
             print(f"Could not retrieve image {image.filename}")
 
 
+def match(search_query, words):
+    query_words = search_query.split()
+    return all(find_whole_word(query, words) for query in query_words)
+
+def find_whole_word(query, words):
+    """https://stackoverflow.com/a/5320179"""
+    matches = re.compile(r'\b({0})\b'.format(query), flags=re.IGNORECASE).search(words)
+    return matches is not None
+
 def search(term):
     """Search for a term in the set of synset descriptions."""
 
     mapping = load_data()
     term = term.lower()
-    search_query = term.split()
 
     results = []
     for index, entry in enumerate(mapping):
-        words = entry.words.lower()
-        if all(query in words for query in search_query):
+        if match(term, entry.words):
             results.append(mapping[index])
 
     return results

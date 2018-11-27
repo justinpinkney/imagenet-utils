@@ -2,6 +2,12 @@ from .context import imagenet_utils as imnet
 import pytest
 import pathlib
 
+def test_query_match():
+    words = "this is a test of searching"
+    query = "test of"
+    matched = imnet.match(query, words)
+    assert matched
+
 def test_search():
     result = imnet.search("taxus baccata")
     assert result[0].wnid == "n11661909"
