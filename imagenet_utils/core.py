@@ -35,6 +35,9 @@ def urls(wnid):
 
     if result.strip() == "Invalid url!":
         raise ValueError(f"Unknown wnid '{wnid}'")
+    elif result.strip() == "":
+        # Some synsets are not available
+        raise ValueError(f"wnid '{wnid}' is not available")
     else:
         images = []
         for line in result.strip().splitlines():
@@ -70,6 +73,7 @@ def save_image(image, destination):
 def download(wnid, destination):
     """Download images associated with a wnid."""
     image_urls = urls(wnid)
+    print(len(image_urls))
     for image in image_urls:
         try:
             print(f"Downloading {image.filename}")
