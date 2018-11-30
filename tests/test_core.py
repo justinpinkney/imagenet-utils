@@ -12,25 +12,52 @@ def test_search():
     result = imnet.search("taxus baccata")
     assert result[0].wnid == "n11661909"
 
-def test_urls():
+def test_urls(monkeypatch):
+    def mock_mapping(wnid):
+        return "first\turl1\nsecond\turl2\n"
+    monkeypatch.setattr(imnet.core, 'get_mapping', mock_mapping)
+
     wnid = "n11661909"
-    expected_length = 636
+    expected_length = 2
 
     urls = imnet.urls(wnid)
 
     assert len(urls) == expected_length
 
-def test_bad_urls():
+def test_bad_urls(monkeypatch):
+    def mock_mapping(wnid):
+        return "Invalid url!\n"
+    monkeypatch.setattr(imnet.core, 'get_mapping', mock_mapping)
+
     not_wnid = "not_wnid"
      
     with pytest.raises(ValueError):
         urls = imnet.urls(not_wnid)
 
-def test_save_image(tmpdir):
+def test_no_urls(monkeypatch):
+    def mock_mapping(wnid):
+        return "\n"
+    monkeypatch.setattr(imnet.core, 'get_mapping', mock_mapping)
+
+    not_wnid = "no_urls"
+     
+    with pytest.raises(ValueError):
+        urls = imnet.urls(not_wnid)
+
+def test_save_image(tmpdir, monkeypatch):
+    def mock_fetch(url):
+        test_image = pathlib.Path(__file__).with_name("test.jpg")
+        with open(test_image, "rb") as im_file:
+            image_content = im_file.read()
+        return image_content
+    def mock_content_type(url):
+        return "image/jpeg"
+    monkeypatch.setattr(imnet.core, 'fetch_image', mock_fetch)
+    monkeypatch.setattr(imnet.core, 'get_content_type', mock_content_type)
+
     filename = "test"
     subdir = "folder"
-    url = "http://image-net.org/nodes/11/07851298/ae/aec22f13c9abb26dc0b378e0f5f9d4fc5769e0ce.thumb"
-    image = imnet.Image(filename, url)
+    image = imnet.Image(filename, "")
     expected_path = pathlib.Path(tmpdir, subdir, filename + ".jpg")
 
     imnet.save_image(image, pathlib.Path(tmpdir, subdir))

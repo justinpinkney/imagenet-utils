@@ -24,15 +24,32 @@ def load_data():
 
     return mapping
 
-def urls(wnid):
-    """Return the list of Images for a given wnid."""
-
+def get_mapping(wnid):
     url = "http://www.image-net.org/api/text/imagenet.synset.geturls.getmapping"
     payload = {"wnid": wnid}
     response = requests.get(url, params=payload)
     response.raise_for_status()
-    result = response.text
+    return response.text
 
+def get_content_type(url):
+    request_opts = {"timeout": 5,
+                    "allow_redirects": False,
+                    }
+    image_check = requests.head(url, **request_opts)
+    return image_check.headers.get("Content-Type")
+
+def fetch_image(url):
+    request_opts = {"timeout": 5,
+                    "allow_redirects": False,
+                    }
+    response = requests.get(url, **request_opts)
+    response.raise_for_status()
+    return response.content
+
+def urls(wnid):
+    """Return the list of Images for a given wnid."""
+
+    result = get_mapping(wnid)
     if result.strip() == "Invalid url!":
         raise ValueError(f"Unknown wnid '{wnid}'")
     elif result.strip() == "":
@@ -48,19 +65,12 @@ def urls(wnid):
 
 def save_image(image, destination):
     """Save the Image to a destination folder."""
-    request_opts = {"timeout": 5,
-                    "allow_redirects": False,
-                    }
-    # check it is an image
-    image_check = requests.head(image.url, **request_opts)
-    content_type = image_check.headers.get("Content-Type")
 
+    content_type = get_content_type(image.url)
     if not content_type == "image/jpeg":
         raise ValueError(f"url not an image, instead type was {content_type}")
 
-    response = requests.get(image.url, **request_opts)
-    response.raise_for_status()
-    content = response.content
+    content = fetch_image(image.url)
 
     if not os.path.isdir(destination):
         os.mkdir(destination)
@@ -73,7 +83,6 @@ def save_image(image, destination):
 def download(wnid, destination):
     """Download images associated with a wnid."""
     image_urls = urls(wnid)
-    print(len(image_urls))
     for image in image_urls:
         try:
             print(f"Downloading {image.filename}")
