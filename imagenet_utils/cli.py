@@ -1,5 +1,6 @@
 import click
 import imagenet_utils as imnet
+from imagenet_utils import printer
 
 @click.group()
 def cli():
@@ -12,8 +13,8 @@ def search(term, number):
     results = imnet.search(term)
     if number and len(results) > number:
         results = results[:number]
-    for result in results:
-        click.echo(f"{result.wnid}: {result.words}")
+    
+    click.echo(printer.print_results(results))
 
 @click.command()
 @click.argument('wnid')
