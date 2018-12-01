@@ -27,6 +27,12 @@ def good_content_type(monkeypatch):
     monkeypatch.setattr(imnet.core, 'get_content_type', mock_content_type)
 
 @pytest.fixture
+def bad_content_type(monkeypatch):
+    def mock_content_type(url):
+        return "text/html"
+    monkeypatch.setattr(imnet.core, 'get_content_type', mock_content_type)
+
+@pytest.fixture
 def file_image_content(monkeypatch):
     def mock_fetch(url):
         test_image = pathlib.Path(__file__).with_name("test.jpg")
@@ -76,11 +82,10 @@ def test_save_image(tmpdir, good_content_type, file_image_content):
 
     assert expected_path.is_file()
 
-def test_save_not_image(tmpdir):
+def test_save_not_image(tmpdir, bad_content_type):
     filename = "test"
     subdir = "folder"
-    url = "http://www.google.com"
-    image = imnet.Image(filename, url)
+    image = imnet.Image(filename, "")
 
     with pytest.raises(ValueError):
         imnet.save_image(image, pathlib.Path(tmpdir, subdir))
