@@ -4,7 +4,10 @@ setup(
         name="imagenet_utils",
         version="0.1",
         entry_points="""
-        [console_scripts]
-        imagenet-utils=imagenet_utils.cli:cli
-        """,
+            [console_scripts]
+            imagenet-utils=imagenet_utils.cli:cli
+            """,
+        install_requires=[
+            'click', 'requests',
+            ]
         )
